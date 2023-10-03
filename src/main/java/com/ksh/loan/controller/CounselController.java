@@ -4,10 +4,7 @@ import com.ksh.loan.dto.CounselDto;
 import com.ksh.loan.dto.ResponseDTO;
 import com.ksh.loan.service.CounselService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import static com.ksh.loan.dto.CounselDto.*;
 
@@ -23,5 +20,9 @@ public class CounselController extends AbstractController {
         return ok(counselService.create(request));
     }
 
+    @GetMapping("/{counselId}")
+    public ResponseDTO<Response> get(@PathVariable Long counselId) {
+        return ok(counselService.get(counselId));
+    }
 
 }
