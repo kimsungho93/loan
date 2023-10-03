@@ -17,15 +17,15 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @MappedSuperclass
-@EntityListeners((AuditingEntityListener.class))
+@EntityListeners(AuditingEntityListener.class)
 public abstract class BaseEntity implements Serializable {
 
     @CreatedDate
-    @Column(updatable = false, columnDefinition = "dataetime default CURRENT_TIMESTAMP NOT NULL COMMENT '생성일자'")
+    @Column(updatable = false, columnDefinition = "datetime default CURRENT_TIMESTAMP NOT NULL COMMENT '생성일자'")
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(columnDefinition = "datetime default CURRENT_TIMESTAMP ON UPPDATE CURRENT_TIMESTAMP NOT NULL COMMENT '수정일자'")
+    @Column(columnDefinition = "datetime default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL COMMENT '수정일자'")
     private LocalDateTime updatedAt;
 
     @Column(columnDefinition = "bit default false NOT NULL COMMENT '이용가능여부'")
