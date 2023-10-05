@@ -5,7 +5,6 @@ import static org.mockito.Mockito.when;
 
 import com.ksh.loan.domain.Application;
 import com.ksh.loan.repository.ApplicationRepository;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
