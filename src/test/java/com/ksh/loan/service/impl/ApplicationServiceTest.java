@@ -1,5 +1,6 @@
 package com.ksh.loan.service.impl;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 import com.ksh.loan.domain.Application;
@@ -51,8 +52,8 @@ public class ApplicationServiceTest {
 
         Response actual = applicationService.create(request);
 
-        Assertions.assertThat(actual.getHopeAmount()).isSameAs(entity.getHopeAmount());
-        Assertions.assertThat(actual.getName()).isSameAs(entity.getName());
+        assertThat(actual.getHopeAmount()).isSameAs(entity.getHopeAmount());
+        assertThat(actual.getName()).isSameAs(entity.getName());
     }
 
     @Test
@@ -67,6 +68,28 @@ public class ApplicationServiceTest {
 
         Response actual = applicationService.get(findId);
 
-        Assertions.assertThat(actual.getApplicationId()).isSameAs(findId);
+        assertThat(actual.getApplicationId()).isSameAs(findId);
+    }
+
+    @Test
+    void Should_ReturnUpdatedResponseOfExistApplicationEntity_When_RequestUpdateExistApplicationInfo() {
+        Long findId = 1L;
+
+        Application entity = Application.builder()
+                .applicationId(1L)
+                .hopeAmount(BigDecimal.valueOf(50000000))
+                .build();
+
+        Request request = Request.builder()
+                .hopeAmount(BigDecimal.valueOf(5000000))
+                .build();
+
+        when(applicationRepository.save(ArgumentMatchers.any(Application.class))).thenReturn(entity);
+        when(applicationRepository.findById(findId)).thenReturn(Optional.ofNullable(entity));
+
+        Response actual = applicationService.update(findId, request);
+
+        assertThat(actual.getApplicationId()).isSameAs(findId);
+        assertThat(actual.getHopeAmount()).isSameAs(request.getHopeAmount());
     }
 }
