@@ -10,4 +10,6 @@ public interface CounselService {
 
     // 상담 조회
     Response get(Long counselId);
+
+    Response update(Long counselId, Request request);
 }
