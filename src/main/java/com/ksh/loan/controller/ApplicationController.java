@@ -1,6 +1,5 @@
 package com.ksh.loan.controller;
 
-import com.ksh.loan.dto.ApplicationDTO;
 import com.ksh.loan.dto.ResponseDTO;
 import com.ksh.loan.service.ApplicationService;
 import lombok.RequiredArgsConstructor;
@@ -28,5 +27,12 @@ public class ApplicationController extends AbstractController{
     @PutMapping("/{applicationId}")
     public ResponseDTO<Response> update(@PathVariable Long applicationId, @RequestBody Request request) {
         return ok(applicationService.update(applicationId, request));
+    }
+
+    @DeleteMapping("/{applicationId}")
+    public ResponseDTO<Void> delete(@PathVariable Long applicationId) {
+        applicationService.delete(applicationId);
+
+        return ok();
     }
 }
