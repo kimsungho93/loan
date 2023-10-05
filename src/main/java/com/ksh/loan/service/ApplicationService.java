@@ -6,4 +6,6 @@ import static com.ksh.loan.dto.ApplicationDTO.*;
 public interface ApplicationService {
 
     Response create(Request request);
+
+    Response get(Long applicationId);
 }

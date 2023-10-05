@@ -2,6 +2,8 @@ package com.ksh.loan.service.impl;
 
 import com.ksh.loan.domain.Application;
 import com.ksh.loan.dto.ApplicationDTO;
+import com.ksh.loan.exception.BaseException;
+import com.ksh.loan.exception.ResultType;
 import com.ksh.loan.repository.ApplicationRepository;
 import com.ksh.loan.service.ApplicationService;
 import lombok.RequiredArgsConstructor;
@@ -27,5 +29,13 @@ public class ApplicationServiceImpl implements ApplicationService {
         Application applied = applicationRepository.save(application);
 
         return modelMapper.map(applied, Response.class);
+    }
+
+    @Override
+    public Response get(Long applicationId) {
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new BaseException(ResultType.SYSTEM_ERROR));
+
+        return modelMapper.map(application, Response.class);
     }
 }
