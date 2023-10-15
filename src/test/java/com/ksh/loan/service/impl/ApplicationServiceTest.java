@@ -3,8 +3,15 @@ package com.ksh.loan.service.impl;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
+import com.ksh.loan.domain.AcceptTerms;
 import com.ksh.loan.domain.Application;
+import com.ksh.loan.domain.Terms;
+import com.ksh.loan.dto.ApplicationDTO;
+import com.ksh.loan.exception.BaseException;
+import com.ksh.loan.repository.AcceptTermsRepository;
 import com.ksh.loan.repository.ApplicationRepository;
+import com.ksh.loan.repository.TermsRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
@@ -13,8 +20,11 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static com.ksh.loan.dto.ApplicationDTO.*;
@@ -27,6 +37,12 @@ public class ApplicationServiceTest {
 
     @Mock
     private ApplicationRepository applicationRepository;
+
+    @Mock
+    private TermsRepository termsRepository;
+
+    @Mock
+    private AcceptTermsRepository acceptTermsRepository;
 
     @Spy
     private ModelMapper modelMapper;
@@ -106,5 +122,100 @@ public class ApplicationServiceTest {
         applicationService.delete(targetId);
 
         assertThat(entity.getIsDeleted()).isSameAs(true);
+    }
+
+    @Test
+    void Should_AddAcceptTerms_When_RequestAcceptTermsOfApplication() {
+        Terms entityA = Terms.builder()
+                .termsId(1L)
+                .name("약관 1")
+                .termsDetailUrl("https://test.com/terms1")
+                .build();
+
+        Terms entityB = Terms.builder()
+                .termsId(2L)
+                .name("약관 2")
+                .termsDetailUrl("https://test.com/terms2")
+                .build();
+
+        List<Long> acceptTerms = Arrays.asList(1L, 2L);
+
+        ApplicationDTO.AcceptTerms request = ApplicationDTO.AcceptTerms.builder()
+                .acceptTermsIds(acceptTerms)
+                .build();
+
+        Long findId = 1L;
+
+        when(applicationRepository.findById(findId)).thenReturn(
+                Optional.ofNullable(Application.builder().build())
+        );
+
+        when(termsRepository.findAll(Sort.by(Sort.Direction.ASC, "termsId"))).thenReturn(Arrays.asList(entityA, entityB));
+        when(acceptTermsRepository.save(ArgumentMatchers.any(AcceptTerms.class))).thenReturn(AcceptTerms.builder().build());
+
+        Boolean actual = applicationService.acceptTerms(findId, request);
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    void Should_ThrowException_When_RequestNotAllAcceptTermsOfApplication() {
+        Terms entityA = Terms.builder()
+                .termsId(1L)
+                .name("약관 1")
+                .termsDetailUrl("https://test.com/terms1")
+                .build();
+
+        Terms entityB = Terms.builder()
+                .termsId(2L)
+                .name("약관 2")
+                .termsDetailUrl("https://test.com/terms2")
+                .build();
+
+        List<Long> acceptTerms = Arrays.asList(1L);
+
+        ApplicationDTO.AcceptTerms request = ApplicationDTO.AcceptTerms.builder()
+                .acceptTermsIds(acceptTerms)
+                .build();
+
+        Long findId = 1L;
+
+        when(applicationRepository.findById(findId)).thenReturn(
+                Optional.ofNullable(Application.builder().build())
+        );
+
+        when(termsRepository.findAll(Sort.by(Sort.Direction.ASC, "termsId"))).thenReturn(Arrays.asList(entityA, entityB));
+
+        Assertions.assertThrows(BaseException.class, () -> applicationService.acceptTerms(findId, request));
+    }
+
+    @Test
+    void Should_ThrowException_When_RequestNotExistAcceptTermsOfApplication() {
+        Terms entityA = Terms.builder()
+                .termsId(1L)
+                .name("약관 1")
+                .termsDetailUrl("https://test.com/terms1")
+                .build();
+
+        Terms entityB = Terms.builder()
+                .termsId(2L)
+                .name("약관 2")
+                .termsDetailUrl("https://test.com/terms2")
+                .build();
+
+        List<Long> acceptTerms = Arrays.asList(1L, 3L);
+
+        ApplicationDTO.AcceptTerms request = ApplicationDTO.AcceptTerms.builder()
+                .acceptTermsIds(acceptTerms)
+                .build();
+
+        Long findId = 1L;
+
+        when(applicationRepository.findById(findId)).thenReturn(
+                Optional.ofNullable(Application.builder().build())
+        );
+
+        when(termsRepository.findAll(Sort.by(Sort.Direction.ASC, "termsId"))).thenReturn(Arrays.asList(entityA, entityB));
+
+        Assertions.assertThrows(BaseException.class, () -> applicationService.acceptTerms(findId, request));
     }
 }

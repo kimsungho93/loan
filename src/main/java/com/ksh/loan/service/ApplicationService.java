@@ -1,6 +1,7 @@
 package com.ksh.loan.service;
 
 
+
 import static com.ksh.loan.dto.ApplicationDTO.*;
 
 public interface ApplicationService {
@@ -12,4 +13,6 @@ public interface ApplicationService {
     Response update(Long applicationId, Request request);
 
     void delete(Long applicationId);
+
+    Boolean acceptTerms(Long applicationId, AcceptTerms request);
 }
