@@ -7,6 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static com.ksh.loan.dto.TermsDTO.*;
 
 @Service
@@ -22,5 +25,11 @@ public class TermsServiceImpl implements TermsService {
         Terms created = termsRepository.save(terms);
 
         return modelMapper.map(created, Response.class);
+    }
+
+    @Override
+    public List<Response> getAll() {
+        List<Terms> termsList = termsRepository.findAll();
+        return termsList.stream().map(t -> modelMapper.map(t, Response.class)).collect(Collectors.toList());
     }
 }
