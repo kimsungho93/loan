@@ -1,5 +1,6 @@
 package com.ksh.loan.controller;
 
+import com.ksh.loan.dto.ApplicationDTO;
 import com.ksh.loan.dto.ResponseDTO;
 import com.ksh.loan.service.JudgementService;
 import lombok.RequiredArgsConstructor;
@@ -38,5 +39,10 @@ public class JudgementController extends AbstractController{
     public ResponseDTO<Void> delete(@PathVariable Long judgementId) {
         judgementService.delete(judgementId);
         return ok();
+    }
+
+    @PatchMapping("/{judgementId}/grants")
+    public ResponseDTO<ApplicationDTO.GrantAmount> grant(@PathVariable Long judgementId) {
+        return ok(judgementService.grant(judgementId));
     }
 }

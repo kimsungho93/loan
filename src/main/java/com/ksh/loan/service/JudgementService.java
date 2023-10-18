@@ -1,6 +1,9 @@
 package com.ksh.loan.service;
 
 
+import com.ksh.loan.dto.ApplicationDTO;
+import com.ksh.loan.dto.ApplicationDTO.GrantAmount;
+
 import static com.ksh.loan.dto.JudgementDTO.*;
 
 public interface JudgementService {
@@ -14,4 +17,6 @@ public interface JudgementService {
     Response update(Long judgementId, Request request);
 
     void delete(Long judgementId);
+
+    GrantAmount grant(Long judgementId);
 }
