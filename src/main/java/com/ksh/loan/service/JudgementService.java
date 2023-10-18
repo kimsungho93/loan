@@ -12,4 +12,6 @@ public interface JudgementService {
     Response getJudgementByApplication(Long applicationId);
 
     Response update(Long judgementId, Request request);
+
+    void delete(Long judgementId);
 }
