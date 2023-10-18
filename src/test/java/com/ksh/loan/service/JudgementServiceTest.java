@@ -1,4 +1,5 @@
 package com.ksh.loan.service;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -60,6 +61,38 @@ public class JudgementServiceTest {
         assertThat(actual.getName()).isSameAs(judgement.getName());
         assertThat(actual.getApplicationId()).isSameAs(judgement.getApplicationId());
         assertThat(actual.getApprovalAmount()).isSameAs(judgement.getApprovalAmount());
+    }
+
+    @Test
+    void Should_ReturnResponseOfExistJudgementEntity_When_RequestExistJudgementId() {
+        Judgement entity = Judgement.builder()
+                .judgementId(1L)
+                .build();
+
+        when(judgementRepository.findById(1L)).thenReturn(Optional.ofNullable(entity));
+
+        Response actual = judgementService.get(1L);
+
+        assertThat(actual.getJudgementId()).isSameAs(1L);
+    }
+
+    @Test
+    void Should_ReturnResponseOfExistJudgementEntity_When_RequestExistApplicationId() {
+        Judgement judgementEntity = Judgement.builder()
+                .judgementId(1L)
+                .build();
+
+        Application applicationEntity = Application.builder()
+                .applicationId(1L)
+                .build();
+
+        when(applicationRepository.findById(1L)).thenReturn(Optional.ofNullable(applicationEntity));
+        when(judgementRepository.findByApplicationId(1L)).thenReturn(Optional.ofNullable(judgementEntity));
+
+        Response actual = judgementService.getJudgementByApplication(1L);
+
+        assertThat(actual.getJudgementId()).isSameAs(1L);
+
     }
 
 }

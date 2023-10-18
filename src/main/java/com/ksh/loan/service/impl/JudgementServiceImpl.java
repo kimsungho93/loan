@@ -38,6 +38,25 @@ public class JudgementServiceImpl implements JudgementService {
         return modelMapper.map(saved, Response.class);
     }
 
+    @Override
+    public Response get(Long judgementId) {
+        Judgement judgement = judgementRepository.findById(judgementId).orElseThrow(
+                () -> new BaseException(ResultType.SYSTEM_ERROR));
+        return modelMapper.map(judgement, Response.class);
+    }
+
+    @Override
+    public Response getJudgementByApplication(Long applicationId) {
+        if (!isPresentApplication(applicationId)) {
+            throw new BaseException(ResultType.SYSTEM_ERROR);
+        }
+
+        Judgement judgement = judgementRepository.findByApplicationId(applicationId).orElseThrow(
+                () -> new BaseException(ResultType.SYSTEM_ERROR));
+
+        return modelMapper.map(judgement, Response.class);
+    }
+
     private boolean isPresentApplication(Long applicationId) {
         return applicationRepository.findById(applicationId).isPresent();
     }
