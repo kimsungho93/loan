@@ -10,4 +10,6 @@ public interface JudgementService {
     Response get(Long judgementId);
 
     Response getJudgementByApplication(Long applicationId);
+
+    Response update(Long judgementId, Request request);
 }

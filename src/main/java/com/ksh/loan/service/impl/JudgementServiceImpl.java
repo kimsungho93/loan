@@ -1,7 +1,6 @@
 package com.ksh.loan.service.impl;
 
 import com.ksh.loan.domain.Judgement;
-import com.ksh.loan.dto.JudgementDTO;
 import com.ksh.loan.exception.BaseException;
 import com.ksh.loan.exception.ResultType;
 import com.ksh.loan.repository.ApplicationRepository;
@@ -53,6 +52,19 @@ public class JudgementServiceImpl implements JudgementService {
 
         Judgement judgement = judgementRepository.findByApplicationId(applicationId).orElseThrow(
                 () -> new BaseException(ResultType.SYSTEM_ERROR));
+
+        return modelMapper.map(judgement, Response.class);
+    }
+
+    @Override
+    public Response update(Long judgementId, Request request) {
+        Judgement judgement = judgementRepository.findById(judgementId).orElseThrow(
+                () -> new BaseException(ResultType.SYSTEM_ERROR));
+
+        judgement.setName(request.getName());
+        judgement.setApprovalAmount(request.getApprovalAmount());
+
+        judgementRepository.save(judgement);
 
         return modelMapper.map(judgement, Response.class);
     }
