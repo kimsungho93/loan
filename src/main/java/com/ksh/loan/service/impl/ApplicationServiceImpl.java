@@ -8,6 +8,7 @@ import com.ksh.loan.exception.BaseException;
 import com.ksh.loan.exception.ResultType;
 import com.ksh.loan.repository.AcceptTermsRepository;
 import com.ksh.loan.repository.ApplicationRepository;
+import com.ksh.loan.repository.JudgementRepository;
 import com.ksh.loan.repository.TermsRepository;
 import com.ksh.loan.service.ApplicationService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -31,6 +33,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final TermsRepository termsRepository;
     private final AcceptTermsRepository acceptTermsRepository;
+    private final JudgementRepository judgementRepository;
     private final ModelMapper modelMapper;
 
     @Override
@@ -109,6 +112,29 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
 
         return true;
+    }
+
+    @Override
+    public Response contract(Long applicationId) {
+        // 신청 정보 있는지 체크
+        Application application = applicationRepository.findById(applicationId).orElseThrow(
+                () -> new BaseException(ResultType.SYSTEM_ERROR));
+
+        // 심사 정보 있는지
+        judgementRepository.findByApplicationId(applicationId).orElseThrow(
+                () -> new BaseException(ResultType.SYSTEM_ERROR));
+
+        // 승인 금액 > 0
+        if (application.getApprovalAmount() == null
+                || application.getApprovalAmount().compareTo(BigDecimal.ZERO) == 0) {
+            throw new BaseException(ResultType.SYSTEM_ERROR);
+        }
+
+        // 계약 체결
+        application.setContractedAt(LocalDateTime.now());
+        applicationRepository.save(application);
+
+        return null;
     }
 
 }
