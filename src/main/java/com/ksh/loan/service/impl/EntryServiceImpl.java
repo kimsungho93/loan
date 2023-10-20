@@ -83,6 +83,7 @@ public class EntryServiceImpl implements EntryService {
 
         // response
         return UpdateResponse.builder()
+                .entryId(entryId)
                 .applicationId(applicationId)
                 .beforeEntryAmount(beforeEntryAmount)
                 .afterEntryAmount(request.getEntryAmount())

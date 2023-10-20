@@ -1,6 +1,5 @@
 package com.ksh.loan.controller;
 
-import com.ksh.loan.dto.EntryDTO;
 import com.ksh.loan.dto.EntryDTO.Request;
 import com.ksh.loan.dto.EntryDTO.Response;
 import com.ksh.loan.dto.EntryDTO.UpdateResponse;
