@@ -1,6 +1,7 @@
 package com.ksh.loan.service.impl;
 
 import com.ksh.loan.domain.Balance;
+import com.ksh.loan.dto.BalanceDTO;
 import com.ksh.loan.dto.BalanceDTO.Request;
 import com.ksh.loan.dto.BalanceDTO.Response;
 import com.ksh.loan.exception.BaseException;
@@ -35,5 +36,24 @@ public class BalanceServiceImpl implements BalanceService {
         Balance saved = balanceRepository.save(balance);
 
         return modelMapper.map(saved, Response.class);
+    }
+
+    @Override
+    public Response update(Long applicationId, BalanceDTO.UpdateRequest request) {
+        // balance
+        Balance balance = balanceRepository.findByApplicationId(applicationId).orElseThrow(
+                () -> new BaseException(ResultType.SYSTEM_ERROR));
+
+        BigDecimal beforeEntryAmount = request.getBeforeEntryAmount();
+        BigDecimal afterEntryAmount = request.getBeforeEntryAmount();
+        BigDecimal updatedBalance = balance.getBalance();
+
+        // as-is -> to-be
+        updatedBalance = updatedBalance.subtract(beforeEntryAmount).add(afterEntryAmount);
+        balance.setBalance(updatedBalance);
+
+        Balance updated = balanceRepository.save(balance);
+
+        return modelMapper.map(updated, Response.class);
     }
 }

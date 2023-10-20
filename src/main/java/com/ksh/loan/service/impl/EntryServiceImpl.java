@@ -4,7 +4,9 @@ import com.ksh.loan.domain.Application;
 import com.ksh.loan.domain.Entry;
 import com.ksh.loan.dto.BalanceDTO;
 import com.ksh.loan.dto.EntryDTO;
+import com.ksh.loan.dto.EntryDTO.Request;
 import com.ksh.loan.dto.EntryDTO.Response;
+import com.ksh.loan.dto.EntryDTO.UpdateResponse;
 import com.ksh.loan.exception.BaseException;
 import com.ksh.loan.exception.ResultType;
 import com.ksh.loan.repository.ApplicationRepository;
@@ -15,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 @Service
@@ -28,7 +31,7 @@ public class EntryServiceImpl implements EntryService {
     private final ModelMapper modelMapper;
 
     @Override
-    public Response create(Long applicationId, EntryDTO.Request request) {
+    public Response create(Long applicationId, Request request) {
         // 계약 체결 여부 검증
         if (!isContractedApplication(applicationId)) {
             throw new BaseException(ResultType.SYSTEM_ERROR);
@@ -56,6 +59,34 @@ public class EntryServiceImpl implements EntryService {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public UpdateResponse update(Long entryId, Request request) {
+        // entry
+        Entry entry = entryRepository.findById(entryId).orElseThrow(
+                () -> new BaseException(ResultType.SYSTEM_ERROR));
+
+        // before -> after
+        BigDecimal beforeEntryAmount = entry.getEntryAmount();
+        entry.setEntryAmount(request.getEntryAmount());
+
+        entryRepository.save(entry);
+
+        // balance update
+        Long applicationId = entry.getApplicationId();
+        balanceService.update(applicationId,
+                BalanceDTO.UpdateRequest.builder()
+                        .beforeEntryAmount(beforeEntryAmount)
+                        .afterEntryAmount(request.getEntryAmount())
+                        .build());
+
+        // response
+        return UpdateResponse.builder()
+                .applicationId(applicationId)
+                .beforeEntryAmount(beforeEntryAmount)
+                .afterEntryAmount(request.getEntryAmount())
+                .build();
     }
 
     private boolean isContractedApplication(Long applicationId) {
