@@ -3,7 +3,6 @@ package com.ksh.loan.service.impl;
 import com.ksh.loan.domain.Application;
 import com.ksh.loan.domain.Entry;
 import com.ksh.loan.dto.BalanceDTO;
-import com.ksh.loan.dto.EntryDTO;
 import com.ksh.loan.dto.EntryDTO.Request;
 import com.ksh.loan.dto.EntryDTO.Response;
 import com.ksh.loan.dto.EntryDTO.UpdateResponse;
@@ -88,6 +87,25 @@ public class EntryServiceImpl implements EntryService {
                 .beforeEntryAmount(beforeEntryAmount)
                 .afterEntryAmount(request.getEntryAmount())
                 .build();
+    }
+
+    @Override
+    public void delete(Long entryId) {
+        Entry entry = entryRepository.findById(entryId).orElseThrow(
+                () -> new BaseException(ResultType.SYSTEM_ERROR));
+
+        entry.setIsDeleted(true);
+
+        entryRepository.save(entry);
+
+        BigDecimal beforeEntryAmount = entry.getEntryAmount();
+
+        Long applicationId = entry.getApplicationId();
+        balanceService.update(applicationId,
+                BalanceDTO.UpdateRequest.builder()
+                        .beforeEntryAmount(beforeEntryAmount)
+                        .afterEntryAmount(BigDecimal.ZERO)
+                        .build());
     }
 
     private boolean isContractedApplication(Long applicationId) {

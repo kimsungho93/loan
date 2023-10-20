@@ -33,6 +33,13 @@ public class BalanceServiceImpl implements BalanceService {
         balance.setApplicationId(applicationId);
         balance.setBalance(entryAmount);
 
+        balanceRepository.findByApplicationId(applicationId).ifPresent(balance1 -> {
+            balance.setBalanceId(balance1.getBalanceId());
+            balance.setIsDeleted(balance1.getIsDeleted());
+            balance.setCreatedAt(balance1.getCreatedAt());
+            balance.setUpdatedAt(balance1.getUpdatedAt());
+        });
+
         Balance saved = balanceRepository.save(balance);
 
         return modelMapper.map(saved, Response.class);
