@@ -3,8 +3,10 @@ package com.ksh.loan.controller;
 import com.ksh.loan.dto.EntryDTO.Request;
 import com.ksh.loan.dto.EntryDTO.Response;
 import com.ksh.loan.dto.EntryDTO.UpdateResponse;
+import com.ksh.loan.dto.RepaymentDTO;
 import com.ksh.loan.dto.ResponseDTO;
 import com.ksh.loan.service.EntryService;
+import com.ksh.loan.service.RepaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class InternalController extends AbstractController{
 
     private final EntryService entryService;
+    private final RepaymentService repaymentService;
 
     @PostMapping("/{applicationId}/entries")
     public ResponseDTO<Response> create(@PathVariable Long applicationId, @RequestBody Request request) {
@@ -34,5 +37,10 @@ public class InternalController extends AbstractController{
     public ResponseDTO<Void> delete(@PathVariable Long entryId) {
         entryService.delete(entryId);
         return ok();
+    }
+
+    @PostMapping("/{applicationId}/repayments")
+    public ResponseDTO<RepaymentDTO.Response> create(@PathVariable Long applicationId, @RequestBody RepaymentDTO.Request request) {
+        return ok(repaymentService.create(applicationId, request));
     }
 }
