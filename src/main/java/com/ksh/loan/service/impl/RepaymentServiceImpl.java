@@ -4,9 +4,12 @@ import com.ksh.loan.domain.Application;
 import com.ksh.loan.domain.Entry;
 import com.ksh.loan.domain.Repayment;
 import com.ksh.loan.dto.BalanceDTO;
+import com.ksh.loan.dto.BalanceDTO.RepaymentRequest.RepaymentType;
 import com.ksh.loan.dto.RepaymentDTO;
+import com.ksh.loan.dto.RepaymentDTO.ListResponse;
 import com.ksh.loan.dto.RepaymentDTO.Request;
 import com.ksh.loan.dto.RepaymentDTO.Response;
+import com.ksh.loan.dto.RepaymentDTO.UpdateResponse;
 import com.ksh.loan.exception.BaseException;
 import com.ksh.loan.exception.ResultType;
 import com.ksh.loan.repository.ApplicationRepository;
@@ -18,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -51,7 +55,7 @@ public class RepaymentServiceImpl implements RepaymentService {
         // balance : 500 -> 100 = 400
         BalanceDTO.Response updatedBalance = balanceService.repaymentUpdate(applicationId, BalanceDTO.RepaymentRequest.builder()
                 .repaymentAmount(request.getRepaymentAmount())
-                .type(BalanceDTO.RepaymentRequest.RepaymentType.REMOVE)
+                .type(RepaymentType.REMOVE)
                 .build());
 
         Response response = modelMapper.map(repayment, Response.class);
@@ -61,13 +65,48 @@ public class RepaymentServiceImpl implements RepaymentService {
     }
 
     @Override
-    public List<RepaymentDTO.ListResponse> get(Long applicationId) {
+    public List<ListResponse> get(Long applicationId) {
         List<Repayment> repayments = repaymentRepository.findAllByApplicationId(applicationId);
 
         return repayments.stream()
-                .map(repayment -> modelMapper.map(repayment, RepaymentDTO.ListResponse.class))
+                .map(repayment -> modelMapper.map(repayment, ListResponse.class))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public UpdateResponse update(Long repaymentId, Request request) {
+        Repayment repayment = repaymentRepository.findById(repaymentId).orElseThrow(
+                () -> new BaseException(ResultType.SYSTEM_ERROR));
+
+        Long applicationId = repayment.getApplicationId();
+        BigDecimal beforeRepaymentAmount = repayment.getRepaymentAmount();
+
+        // 500 - 100 = 400
+        // 400 + 100 = 500
+        // 500 - 200 = 300
+
+        balanceService.repaymentUpdate(applicationId,
+                BalanceDTO.RepaymentRequest.builder()
+                        .repaymentAmount(beforeRepaymentAmount)
+                        .type(RepaymentType.ADD)
+                        .build());
+
+        repayment.setRepaymentAmount(request.getRepaymentAmount());
+        repaymentRepository.save(repayment);
+
+        BalanceDTO.Response updatedBalance = balanceService.repaymentUpdate(applicationId, BalanceDTO.RepaymentRequest.builder()
+                .repaymentAmount(request.getRepaymentAmount())
+                .type(RepaymentType.REMOVE)
+                .build());
+
+        return UpdateResponse.builder()
+                .applicationId(applicationId)
+                .beforeRepaymentAmount(beforeRepaymentAmount)
+                .afterRepaymentAmount(request.getRepaymentAmount())
+                .balance(updatedBalance.getBalance())
+                .build();
+    }
+
 
     private boolean isRepayableApplication(Long applicationId) {
         Optional<Application> existedApplication = applicationRepository.findById(applicationId);
