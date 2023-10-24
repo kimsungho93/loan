@@ -5,7 +5,6 @@ import com.ksh.loan.domain.Entry;
 import com.ksh.loan.domain.Repayment;
 import com.ksh.loan.dto.BalanceDTO;
 import com.ksh.loan.dto.BalanceDTO.RepaymentRequest.RepaymentType;
-import com.ksh.loan.dto.RepaymentDTO;
 import com.ksh.loan.dto.RepaymentDTO.ListResponse;
 import com.ksh.loan.dto.RepaymentDTO.Request;
 import com.ksh.loan.dto.RepaymentDTO.Response;
@@ -107,6 +106,24 @@ public class RepaymentServiceImpl implements RepaymentService {
                 .createdAt(repayment.getCreatedAt())
                 .updatedAt(repayment.getUpdatedAt())
                 .build();
+    }
+
+    @Override
+    public void delete(Long repaymentId) {
+        Repayment repayment = repaymentRepository.findById(repaymentId).orElseThrow(
+                () -> new BaseException(ResultType.SYSTEM_ERROR));
+
+        Long applicationId = repayment.getApplicationId();
+        BigDecimal removeRepaymentAmount = repayment.getRepaymentAmount();
+
+        balanceService.repaymentUpdate(applicationId,
+                BalanceDTO.RepaymentRequest.builder()
+                        .repaymentAmount(removeRepaymentAmount)
+                        .type(RepaymentType.ADD)
+                        .build());
+
+        repayment.setIsDeleted(true);
+        repaymentRepository.save(repayment);
     }
 
 
